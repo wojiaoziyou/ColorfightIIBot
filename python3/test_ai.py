@@ -3,14 +3,7 @@ import time
 import random
 from colorfight.constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_FORTRESS, BUILDING_COST
 
-def play_game(
-        game, \
-        # room     = 'public', \
-        room     = 'Hell', \
-        username = 'DEMON', \
-        password = 'ineffablehusbands' \
-        ):
-
+def play_game(game, room, username, password, join_key):
     # Connect to the server
     game.connect(room = room)
     
@@ -18,8 +11,7 @@ def play_game(
     if game.register(
             username = username, \
             password = password, \
-            join_key = "Crowley"        # For Gameroom "Hell"
-            # join_key = ""               # For Gameroom "public"
+            join_key = join_key
             ):
         # This is the game loop
         while True:
@@ -45,16 +37,17 @@ def play_game(
     
             # game.me.cells is a dict, where the keys are Position and the values
             # are MapCell. Get all my cells.
-            for cell in game.me.cells.values():
+            for cell in me.cells.values():
                 # Check the surrounding position
                 for pos in cell.position.get_surrounding_cardinals():
                     # Get the MapCell object of that position
                     c = game.game_map[pos]
                     # Attack if the cost is less than what I have, and the owner
                     # is not mine, and I have not attacked it in this round already
-                    # We also try to keep our cell number under 100 to avoid tax
+                    # We also try to keep our cell number under 75 to avoid tax
                     if c.attack_cost < me.energy and c.owner != game.uid \
-                            and c.position not in my_attack_list:
+                            and c.position not in my_attack_list \
+                            and len(me.cells) < 75:
                         # Add the attack command in the command list
                         # Subtract the attack cost manually so I can keep track
                         # of the energy I have.
@@ -62,23 +55,25 @@ def play_game(
                         # the same cell
                         cmd_list.append(game.attack(pos, c.attack_cost))
                         print("We are attacking ({}, {}) with {} energy".format(pos.x, pos.y, c.attack_cost))
-                        game.me.energy -= c.attack_cost
+                        me.energy -= c.attack_cost
                         my_attack_list.append(c.position)
     
                 # If we can upgrade the building, upgrade it.
                 # Notice can_update only checks for upper bound. You need to check
                 # tech_level by yourself. 
-                if cell.building.can_upgrade and \
-                        (cell.building.is_home or cell.building.level < me.tech_level) and \
-                        cell.building.upgrade_gold < me.gold and \
-                        cell.building.upgrade_energy < me.energy:
+                if cell.building.can_upgrade \
+                        and (cell.building.is_home or cell.building.level < me.tech_level) \
+                        and cell.building.upgrade_gold < me.gold \
+                        and cell.building.upgrade_energy < me.energy:
                     cmd_list.append(game.upgrade(cell.position))
                     print("We upgraded ({}, {})".format(cell.position.x, cell.position.y))
                     me.gold   -= cell.building.upgrade_gold
                     me.energy -= cell.building.upgrade_energy
                     
                 # Build a random building if we have enough gold
-                if cell.owner == me.uid and cell.building.is_empty and me.gold >= BUILDING_COST[0]:
+                if cell.owner == me.uid \
+                        and cell.building.is_empty \
+                        and me.gold >= BUILDING_COST[0]:
                     building = random.choice([BLD_FORTRESS, BLD_GOLD_MINE, BLD_ENERGY_WELL])
                     cmd_list.append(game.build(cell.position, building))
                     print("We build {} on ({}, {})".format(building, cell.position.x, cell.position.y))
@@ -87,24 +82,19 @@ def play_game(
             
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
-            print(result)
+            # print(result)
 
-    # Do this to release all the allocated resources. 
-    game.disconnect()
+            # Do this to release all the allocated resources. 
+            if me.gold < 0:
+                game.disconnect()
 
 if __name__ == '__main__':
-    # Create a Colorfight Instance. This will be the object that you interact
-    # with.
+    # Create a Colorfight Instance. This will be the object that you interact with.
     game = Colorfight()
 
-    # ================== Find a random non-full rank room ==================
-    #room_list = game.get_gameroom_list()
-    #rank_room = [room for room in room_list if room["rank"] and room["player_number"] < room["max_player"]]
-    #room = random.choice(rank_room)["name"]
     # ==================== Enter a room ====================================
-    # Delete it if you have a room from above
-    # room = 'public'
-    room = 'Hell'
+    # room = 'public'; join_key = ''
+    room = 'Hell'; join_key = 'Crowley'
     username = 'DEMON'
     password = 'ineffablehusbands'
 
@@ -113,19 +103,8 @@ if __name__ == '__main__':
         game     = game, \
         room     = room, \
         username = username, \
-        password = password
+        password = password, \
+        join_key = join_key
     )
     # ======================================================================
 
-    # ========================= Run my bot forever =========================
-    # while True:
-    #    try:
-    #        play_game(
-    #            game     = game, \
-    #            room     = room, \
-    #            username = username, \
-    #            password = password
-    #        )
-    #    except Exception as e:
-    #        print(e)
-    #        time.sleep(2)

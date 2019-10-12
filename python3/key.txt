@@ -1,6 +1,6 @@
 Create Gameroom
 Name: Hell
-Admin pw: ineffablehusbands
+Admin pw: Aziraphale
 join key: Crowley
 
 Game username: DEMON
