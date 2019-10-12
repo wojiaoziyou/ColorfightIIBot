@@ -1,0 +1,4 @@
+1, unlimited cell list length (compared to example_ai)
+results: good at first 200 rounds -> fulfill the whole map -> negative gold value
+
+
