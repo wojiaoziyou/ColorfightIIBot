@@ -1,6 +1,4 @@
 from colorfight import Colorfight
-import time
-import random
 from colorfight.constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_FORTRESS, BUILDING_COST
 
 def play_game(
@@ -10,17 +8,11 @@ def play_game(
         username = 'DEMON', \
         password = 'ineffablehusbands' \
         ):
-    # Connect to the server. This will connect to the public room. If you want to
-    # join other rooms, you need to change the argument
+
+    # Connect to the server
     game.connect(room = room)
     
     # game.register should return True if succeed.
-    # As no duplicate usernames are allowed, a random integer string is appended
-    # to the example username. You don't need to do this, change the username
-    # to your ID.
-    # You need to set a password. For the example AI, the current time is used
-    # as the password. You should change it to something that will not change 
-    # between runs so you can continue the game if disconnected.
     if game.register(
             username = username, \
             password = password, \
@@ -33,12 +25,11 @@ def play_game(
             cmd_list = []
             # The list of cells that we want to attack
             my_attack_list = []
-            # update_turn() is required to get the latest information from the
-            # server. This will halt the program until it receives the updated
-            # information. 
+            # update_turn() is required to get the latest information from the server.
+            # This will halt the program until it receives the updated information. 
             # After update_turn(), game object will be updated.   
-            # update_turn() returns a Boolean value indicating if it's still 
-            # the same game. If it's not, break out
+            # update_turn() returns a Boolean value indicating if it's still the same game.
+            # If it's not, break out
             if not game.update_turn():
                 break
     
@@ -61,8 +52,7 @@ def play_game(
                     # is not mine, and I have not attacked it in this round already
                     # We also try to keep our cell number under 100 to avoid tax
                     if c.attack_cost < me.energy and c.owner != game.uid \
-                            and c.position not in my_attack_list \
-                            and len(me.cells) < 95:
+                            and c.position not in my_attack_list:
                         # Add the attack command in the command list
                         # Subtract the attack cost manually so I can keep track
                         # of the energy I have.
