@@ -1,4 +1,6 @@
 from colorfight import Colorfight
+import time
+import random
 from colorfight.constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_FORTRESS, BUILDING_COST
 
 def play_game(
