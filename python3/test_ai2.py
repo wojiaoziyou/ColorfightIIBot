@@ -11,7 +11,7 @@ def play_game(game, room, username, password, join_key):
     if game.register(
             username = username, \
             password = password, \
-            join_key = join_key
+            join_key = join_key \
             ):
 
         # ========================= This is the game loop ===============================
@@ -38,11 +38,11 @@ def play_game(game, room, username, password, join_key):
                             and me.gold >= BUILDING_COST[0]:
                         for pos in cell.position.get_surrounding_cardinals():
                             c = game.game_map[pos]
-                            # if c.owner == me.uid and (c.building.name == "gold_mine" or c.building.name == "energy_well" or c.building.name == "home"):
-                                # building = BLD_FORTRESS
-                                # building = random.choice([BLD_FORTRESS, BLD_GOLD_MINE, BLD_ENERGY_WELL])
                             if c.owner == me.uid:
                                 building = random.choice([BLD_GOLD_MINE, BLD_GOLD_MINE, BLD_ENERGY_WELL])
+                            if c.owner != me.uid \
+                                    and c.building.name != 'empty':
+                                building = BLD_FORTRESS
 
                         if building != '':
                             cmd_list.append(game.build(cell.position, building))
