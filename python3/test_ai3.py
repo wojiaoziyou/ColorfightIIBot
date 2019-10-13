@@ -28,15 +28,19 @@ def play_game(game, room, username, password, join_key):
 
             cell_list=list(me.cells.values())
             random.shuffle(cell_list)
+            home_exist = False
             for cell in cell_list:
                 # build all
                 building = ''
+                if cell.building.name == "home":
+                    home_exist = True
                 if cell.owner == me.uid \
                         and cell.building.is_empty \
                         and me.gold >= BUILDING_COST[0]:
                     for pos in cell.position.get_surrounding_cardinals():
                         c = game.game_map[pos]
-                        if c.owner != 0 and c.owner != me.uid:
+                        if c.owner != 0 and c.owner != me.uid \
+                                or (c.owner == me.uid and c.building.name == "home"):
                             building = BLD_FORTRESS
                     if building == '':
                         if cell.energy > cell.gold:
@@ -71,7 +75,15 @@ def play_game(game, room, username, password, join_key):
                         print("We are attacking ({}, {}) with {} energy".format(pos.x, pos.y, c.attack_cost))
                         me.energy -= c.attack_cost
                         attack_list.append(c.position)
-            
+            if home_exist == False:
+                try:
+                    building = "h"
+                    cmd_list.append(game.build(cell_list[0].position, building))
+                    print("We build {} on ({}, {})".format(building, cell_list[0].position.x, cell_list[0].position.y))
+                    me.gold -= BUILDING_COST[0]
+                except:
+                    pass
+
             game.send_cmd(cmd_list)
         # ==================================== policy ends ============================
 
@@ -81,6 +93,7 @@ if __name__ == '__main__':
 
     # ==================== Enter a room ====================================
     room = 'public'; join_key = ''
+    # room = 'official_final'; join_key = ''
     # room = 'Hell'; join_key = 'Crowley'
     username = 'DEMON'
     password = 'ineffablehusbands'
