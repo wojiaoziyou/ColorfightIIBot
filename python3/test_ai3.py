@@ -25,18 +25,18 @@ def play_game(game, room, username, password, join_key):
 
         # ================================== policy begins ============================
             cmd_list = []
-            building = ''
 
             cell_list=list(me.cells.values())
             random.shuffle(cell_list)
             for cell in cell_list:
                 # build all
+                building = ''
                 if cell.owner == me.uid \
                         and cell.building.is_empty \
                         and me.gold >= BUILDING_COST[0]:
                     for pos in cell.position.get_surrounding_cardinals():
                         c = game.game_map[pos]
-                        if c.owner != 0:
+                        if c.owner != 0 and c.owner != me.uid:
                             building = BLD_FORTRESS
                     if building == '':
                         if cell.energy > cell.gold:
