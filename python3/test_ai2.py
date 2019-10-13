@@ -30,7 +30,9 @@ def play_game(game, room, username, password, join_key):
             building = 'home'
             while building != '':
                 building = ''
-                for cell in me.cells.values():
+                cell_list=list(me.cells.values())
+                random.shuffle(cell_list)
+                for cell in cell_list:
                     if cell.owner == me.uid \
                             and cell.building.is_empty \
                             and me.gold >= BUILDING_COST[0]:
@@ -40,7 +42,7 @@ def play_game(game, room, username, password, join_key):
                                 # building = BLD_FORTRESS
                                 # building = random.choice([BLD_FORTRESS, BLD_GOLD_MINE, BLD_ENERGY_WELL])
                             if c.owner == me.uid:
-                                building = random.choice([BLD_GOLD_MINE, BLD_ENERGY_WELL])
+                                building = random.choice([BLD_GOLD_MINE, BLD_GOLD_MINE, BLD_ENERGY_WELL])
 
                         if building != '':
                             cmd_list.append(game.build(cell.position, building))
@@ -53,7 +55,9 @@ def play_game(game, room, username, password, join_key):
             updatable = True
             while updatable:
                 updatable = False
-                for cell in me.cells.values():
+                cell_list=list(me.cells.values())
+                random.shuffle(cell_list)
+                for cell in cell_list:
                     if cell.building.can_upgrade \
                             and (cell.building.is_home or cell.building.level < me.tech_level) \
                             and cell.building.upgrade_gold < me.gold \
@@ -68,16 +72,22 @@ def play_game(game, room, username, password, join_key):
             # attack
             cmd_list = []
             attack_list = []
-            for cell in me.cells.values():
-                for pos in cell.position.get_surrounding_cardinals():
-                    c = game.game_map[pos]
-                    if c.attack_cost < me.energy and c.owner != me.uid \
-                            and c.position not in attack_list:
-                        cmd_list.append(game.attack(pos, c.attack_cost))
-                        print("We are attacking ({}, {}) with {} energy".format(pos.x, pos.y, c.attack_cost))
-                        me.energy -= c.attack_cost
-                        attack_list.append(c.position)
-            game.send_cmd(cmd_list)
+            attackable = True
+            while attackable:
+                attackable = False
+                cell_list=list(me.cells.values())
+                random.shuffle(cell_list)
+                for cell in cell_list:
+                    for pos in cell.position.get_surrounding_cardinals():
+                        c = game.game_map[pos]
+                        if c.attack_cost < me.energy and c.owner != me.uid \
+                                and c.position not in attack_list:
+                            attackable = True
+                            cmd_list.append(game.attack(pos, c.attack_cost))
+                            print("We are attacking ({}, {}) with {} energy".format(pos.x, pos.y, c.attack_cost))
+                            me.energy -= c.attack_cost
+                            attack_list.append(c.position)
+                game.send_cmd(cmd_list)
         # ==================================== policy ends ============================
 
 if __name__ == '__main__':
